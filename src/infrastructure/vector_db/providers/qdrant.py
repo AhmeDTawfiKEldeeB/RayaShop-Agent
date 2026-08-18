@@ -3,7 +3,7 @@ import logging
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as qdrant_models
 
-from src.config.settings import get_qdrant_settings
+from src.config.settings import settings
 from src.infrastructure.vector_db.interface import (
     Distance,
     Filter,
@@ -28,14 +28,13 @@ class QdrantDB(VectorStore):
         url: str | None = None,
         api_key: str | None = None,
     ) -> None:
-        qdrant_settings = get_qdrant_settings()
-        self.url = url or qdrant_settings.url
-        self.api_key = api_key or qdrant_settings.api_key
+        self.url = url or settings.qdrant.url
+        self.api_key = api_key or settings.qdrant.api_key
         self._client = QdrantClient(
             url=self.url,
             api_key=self.api_key,
-            prefer_grpc=qdrant_settings.prefer_grpc,
-            timeout=qdrant_settings.timeout,
+            prefer_grpc=settings.qdrant.prefer_grpc,
+            timeout=settings.qdrant.timeout,
         )
 
     @property
