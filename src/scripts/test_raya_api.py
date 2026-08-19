@@ -1,6 +1,6 @@
-import httpx
 import json
 
+import httpx
 
 API_URL = "https://api-rayashop.global.ssl.fastly.net/graphql"
 
@@ -128,6 +128,7 @@ def main():
         "Accept": "application/json",
         "Referer": "https://www.rayashop.com/",
         "Origin": "https://www.rayashop.com",
+        "Authorization": "Bearer b6ed07fd0afcf762272622ae493b4e4c",
     }
 
     all_products = []
