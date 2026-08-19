@@ -66,6 +66,11 @@ class RayaScraperSettings(BaseModel):
         description="Raya GraphQL API URL",
     )
 
+    api_key: str | None = Field(
+        default=None,
+        description="Raya GraphQL API key",
+    )
+
     store_code: str = Field(
         default="en",
         description="Raya store code",
