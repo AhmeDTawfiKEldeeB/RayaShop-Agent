@@ -3,6 +3,7 @@ import json
 import httpx
 
 from src.config.settings import settings
+
 from ..base import BaseScraper
 from ..models import ScrapedProduct
 
@@ -70,6 +71,7 @@ class RayaScraper(BaseScraper):
 
         self.base_url = raya_settings.base_url
         self.api_url = raya_settings.api_url
+        self.api_key = raya_settings.api_key
         self.store_code = raya_settings.store_code
         self.page_size = raya_settings.page_size
 
@@ -83,6 +85,9 @@ class RayaScraper(BaseScraper):
             "Referer": f"{self.base_url}/",
             "Origin": self.base_url,
         }
+
+        if self.api_key:
+            self.headers["Authorization"] = f"Bearer {self.api_key}"
 
     async def scrape_products(self) -> list[ScrapedProduct]:
         products: list[ScrapedProduct] = []
