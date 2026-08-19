@@ -6,3 +6,9 @@ uvicorn==0.52.3
 qdrant-client==1.19.0
 sentence-transformers==5.7.0
 google-genai==2.8.0
+beautifulsoup4==4.15.0
+bs4==0.0.2
+SQLAlchemy==2.0.52
+psycopg[binary]
+
+
