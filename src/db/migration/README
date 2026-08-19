@@ -1,0 +1,35 @@
+# Alembic Migration Environment
+
+## Structure
+
+```
+migration/
+├── versions/          # Migration files
+├── alembic.ini        # Alembic configuration
+├── env.py             # Migration environment
+├── script.py.mako     # Migration template
+├── README
+└── __init__.py
+```
+
+## Commands
+
+```bash
+# Run all pending migrations
+uv run alembic -c src/db/migration/alembic.ini upgrade head
+
+# Rollback one migration
+uv run alembic -c src/db/migration/alembic.ini downgrade -1
+
+# Generate new migration (auto-detect model changes)
+uv run alembic -c src/db/migration/alembic.ini revision --autogenerate -m "description"
+
+# Generate empty migration
+uv run alembic -c src/db/migration/alembic.ini revision -m "description"
+
+# Show current migration
+uv run alembic -c src/db/migration/alembic.ini current
+
+# Show migration history
+uv run alembic -c src/db/migration/alembic.ini history
+```
