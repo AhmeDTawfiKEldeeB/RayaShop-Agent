@@ -1,10 +1,14 @@
+from typing import ClassVar
+
 from src.infrastructure.vector_db.interface import VectorStore
 from src.infrastructure.vector_db.providers.qdrant import QdrantDB
+from src.infrastructure.vector_db.providers.weaviate import WeaviateDB
 
 
 class VectorDBFactory:
-    _providers: dict[str, type[VectorStore]] = {
+    _providers: ClassVar[dict[str, type[VectorStore]]] = {
         "qdrant": QdrantDB,
+        "weaviate": WeaviateDB,
     }
 
     @classmethod
