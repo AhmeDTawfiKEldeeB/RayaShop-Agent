@@ -112,7 +112,7 @@ class ScraperSettings(BaseModel):
 
 class LLMGeminiSettings(BaseModel):
     api_key: str | None = Field(default=None, description="Google Gemini API key")
-    model: str = Field(default="gemini-2.0-flash", description="Gemini chat model")
+    model: str = Field(default="gemini-2.5-flash", description="Gemini chat model")
 
 
 class LLMOpenRouterSettings(BaseModel):
