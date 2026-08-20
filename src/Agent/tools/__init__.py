@@ -1,3 +1,3 @@
-from src.Agent.tools.retrieval import search_products
+from src.Agent.tools.retrieval_tool import search_products
 
 __all__ = ["search_products"]
