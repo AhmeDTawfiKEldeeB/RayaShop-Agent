@@ -40,6 +40,26 @@ class QdrantSettings(BaseModel):
     timeout: float = Field(default=10.0, description="Request timeout in seconds")
 
 
+class WeaviateSettings(BaseModel):
+    cloud_url: str | None = Field(
+        default=None,
+        description="Weaviate Cloud (WCD) cluster URL, e.g. https://xxxx.weaviate.cloud",
+    )
+    host: str = Field(default="localhost", description="Weaviate HTTP host")
+    http_port: int = Field(default=8080, description="Weaviate HTTP port")
+    http_secure: bool = Field(default=False, description="Use HTTPS for HTTP API")
+    grpc_host: str | None = Field(default=None, description="Weaviate gRPC host (defaults to host)")
+    grpc_port: int = Field(default=50051, description="Weaviate gRPC port")
+    grpc_secure: bool = Field(default=False, description="Use TLS for gRPC API")
+    api_key: str | None = Field(default=None, description="Weaviate API key")
+    headers: dict[str, str] = Field(default_factory=dict, description="Additional HTTP headers")
+    collection_name: str = Field(default="rayashop", description="Default collection name")
+    vector_size: int = Field(default=384, description="Vector dimension size")
+    distance_metric: str = Field(default="cosine", description="Distance metric")
+    timeout: float = Field(default=10.0, description="Request timeout in seconds")
+    skip_init_checks: bool = Field(default=False, description="Skip initial connection checks")
+
+
 class HuggingFaceSettings(BaseModel):
     model_name: str = Field(default="all-MiniLM-L6-v2", description="Hugging Face model name")
 
@@ -90,8 +110,9 @@ class Settings(BaseSettings):
     app: AppSettings = AppSettings()
     api: APISettings = APISettings()
     postgres: PostgresSettings = PostgresSettings()
-    vector_db_provider: str = Field(default="qdrant", description="Vector DB provider")
+    vector_db_provider: str = Field(default="weaviate", description="Vector DB provider")
     qdrant: QdrantSettings = QdrantSettings()
+    weaviate: WeaviateSettings = WeaviateSettings()
     embedding: EmbeddingSettings = EmbeddingSettings()
     scraper: ScraperSettings = ScraperSettings()
 
