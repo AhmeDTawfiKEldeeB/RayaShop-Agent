@@ -19,6 +19,11 @@ dependencies = [
     "alembic>=1.13.0",
     "psycopg2-binary>=2.9.0",
     "weaviate-client>=4.23.0",
+    "langchain-core>=1.6.0",
+    "langgraph>=1.2.11",
+    "langchain-google-genai>=4.3.4",
+    "langchain-openai>=1.6.0",
+    "langchain-groq>=1.1.3",
 ]
 
 [project.optional-dependencies]
