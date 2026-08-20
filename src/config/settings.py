@@ -54,6 +54,10 @@ class WeaviateSettings(BaseModel):
     api_key: str | None = Field(default=None, description="Weaviate API key")
     headers: dict[str, str] = Field(default_factory=dict, description="Additional HTTP headers")
     collection_name: str = Field(default="rayashop", description="Default collection name")
+    product_collection_name: str = Field(
+        default="rayashop_product",
+        description="Product catalog collection name in Weaviate",
+    )
     vector_size: int = Field(default=384, description="Vector dimension size")
     distance_metric: str = Field(default="cosine", description="Distance metric")
     timeout: float = Field(default=10.0, description="Request timeout in seconds")
