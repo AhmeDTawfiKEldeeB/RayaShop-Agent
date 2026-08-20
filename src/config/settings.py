@@ -110,6 +110,32 @@ class ScraperSettings(BaseModel):
     raya: RayaScraperSettings = RayaScraperSettings()
 
 
+class LLMGeminiSettings(BaseModel):
+    api_key: str | None = Field(default=None, description="Google Gemini API key")
+    model: str = Field(default="gemini-2.0-flash", description="Gemini chat model")
+
+
+class LLMOpenRouterSettings(BaseModel):
+    api_key: str | None = Field(default=None, description="OpenRouter API key")
+    model: str = Field(default="anthropic/claude-sonnet-4", description="OpenRouter model ID")
+    base_url: str = Field(
+        default="https://openrouter.ai/api/v1",
+        description="OpenRouter API base URL",
+    )
+
+
+class LLMGroqSettings(BaseModel):
+    api_key: str | None = Field(default=None, description="Groq API key")
+    model: str = Field(default="llama-3.3-70b-versatile", description="Groq model name")
+
+
+class LLMSettings(BaseModel):
+    provider: str = Field(default="gemini", description="LLM provider")
+    gemini: LLMGeminiSettings = LLMGeminiSettings()
+    openrouter: LLMOpenRouterSettings = LLMOpenRouterSettings()
+    groq: LLMGroqSettings = LLMGroqSettings()
+
+
 class Settings(BaseSettings):
     app: AppSettings = AppSettings()
     api: APISettings = APISettings()
@@ -118,6 +144,7 @@ class Settings(BaseSettings):
     qdrant: QdrantSettings = QdrantSettings()
     weaviate: WeaviateSettings = WeaviateSettings()
     embedding: EmbeddingSettings = EmbeddingSettings()
+    llm: LLMSettings = LLMSettings()
     scraper: ScraperSettings = ScraperSettings()
 
     model_config = SettingsConfigDict(
