@@ -61,6 +61,14 @@ def _extract_result(
     return original_id, score, properties
 
 
+def _extract_hybrid_result(object_) -> tuple[str | int, float, dict]:
+    properties = dict(object_.properties or {})
+    original_id = str(properties.pop(ORIGINAL_ID_KEY, str(object_.uuid)))
+    raw_score = object_.metadata.score if object_.metadata is not None else None
+    score = float(raw_score) if raw_score is not None else 0.0
+    return original_id, score, properties
+
+
 class WeaviateDB(VectorStore):
     def __init__(
         self,
@@ -283,6 +291,34 @@ class WeaviateDB(VectorStore):
             )
             for object_ in results.objects
             for record_id, score, payload in [_extract_result(object_, distance_metric)]
+        ]
+
+    def hybrid_search(
+        self,
+        collection_name: str,
+        query_text: str,
+        query_vector: list[float],
+        limit: int = 10,
+        alpha: float = 0.5,
+        filter: Filter | None = None,
+    ) -> list[SearchResult]:
+        results = self._collection(collection_name).query.hybrid(
+            query=query_text,
+            vector=query_vector,
+            alpha=alpha,
+            limit=limit,
+            filters=self._to_weaviate_filter(filter),
+            return_metadata=["score"],
+        )
+
+        return [
+            SearchResult(
+                id=record_id,
+                score=score,
+                payload=payload,
+            )
+            for object_ in results.objects
+            for record_id, score, payload in [_extract_hybrid_result(object_)]
         ]
 
     def retrieve(
