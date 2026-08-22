@@ -81,6 +81,18 @@ class VectorStore(ABC):
         ...
 
     @abstractmethod
+    def hybrid_search(
+        self,
+        collection_name: str,
+        query_text: str,
+        query_vector: list[float],
+        limit: int = 10,
+        alpha: float = 0.5,
+        filter: Filter | None = None,
+    ) -> list[SearchResult]:
+        ...
+
+    @abstractmethod
     def retrieve(
         self,
         collection_name: str,
