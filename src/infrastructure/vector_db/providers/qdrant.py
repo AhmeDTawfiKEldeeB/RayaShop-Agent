@@ -163,6 +163,22 @@ class QdrantDB(VectorStore):
             for point in result.points
         ]
 
+    def hybrid_search(
+        self,
+        collection_name: str,
+        query_text: str,
+        query_vector: list[float],
+        limit: int = 10,
+        alpha: float = 0.5,
+        filter: Filter | None = None,
+    ) -> list[SearchResult]:
+        logger.warning(
+            "Qdrant does not support keyword fusion without a text index, "
+            "falling back to semantic search for query=%r",
+            query_text,
+        )
+        return self.search(collection_name, query_vector=query_vector, limit=limit, filter=filter)
+
     def retrieve(
         self,
         collection_name: str,
