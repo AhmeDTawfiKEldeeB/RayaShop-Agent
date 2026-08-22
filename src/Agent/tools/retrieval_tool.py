@@ -30,7 +30,7 @@ def _get_embedder():
 
 @tool
 def search_products(query: str, limit: int = 5) -> str:
-    """Search RayaShop product catalog using semantic vector search.
+    """Search RayaShop product catalog using hybrid search (keyword + semantic).
 
     Use this tool when the user asks to find, search, or look up products.
     The query should describe what the user is looking for in natural language.
@@ -44,14 +44,15 @@ def search_products(query: str, limit: int = 5) -> str:
 
     Returns:
         JSON string containing a list of matching products with name, price,
-        old_price, stock_status, sku, url, and similarity score.
+        old_price, stock_status, sku, url, and relevance score.
     """
     store = _get_store()
     embedder = _get_embedder()
 
     vector = embedder.embed_text(query)
-    results = store.db.search(
+    results = store.db.hybrid_search(
         store.collection_name,
+        query_text=query,
         query_vector=vector,
         limit=limit,
     )
