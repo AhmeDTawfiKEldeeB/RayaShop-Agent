@@ -13,7 +13,9 @@ def main():
     agent = create_react_agent(llm, tools=[search_products])
 
     questions = [
-        "I want Refurbished Apple iPhone 16 Pro Max Single ",  # Example question
+        "I want Refurbished Apple iPhone 16 Pro Max Single",
+        "SONY WH-1000XM5 price",
+        "wireless gaming mouse rgb",
     ]
 
     for q in questions:
