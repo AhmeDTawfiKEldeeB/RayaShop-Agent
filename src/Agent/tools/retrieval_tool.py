@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 
 from langchain_core.tools import tool
 
@@ -12,6 +13,17 @@ logger = logging.getLogger(__name__)
 
 _store: WeaviateProductStore | None = None
 _embedder = None
+
+_GREETINGS = {
+    "hi", "hello", "hey", "ahla", "ahlan", "hola", "salam", "marhaba",
+    "thanks", "thank you", "ok", "okay", "مرحبا", "اهلا", "هلا",
+    "السلام عليكم", "صباح الخير", "مساء الخير", "ازيك", "عامل ايه",
+}
+
+
+def _is_greeting(text: str) -> bool:
+    t = re.sub(r"[^\w\s\u0600-\u06FF]", "", text.strip().lower()).strip()
+    return t in _GREETINGS
 
 
 def _get_store() -> WeaviateProductStore:
@@ -28,28 +40,16 @@ def _get_embedder():
     return _embedder
 
 
-@tool
-def search_products(query: str, limit: int = 5) -> str:
-    """Search RayaShop product catalog using hybrid search (keyword + semantic).
+def search_products_raw(query: str, limit: int = 7) -> list[dict]:
+    if _is_greeting(query):
+        logger.info("search_products: greeting %r -> empty", query)
+        return []
 
-    Use this tool when the user asks to find, search, or look up products.
-    The query should describe what the user is looking for in natural language.
-
-    Args:
-        query: Natural language description of products to find.
-               Examples: "wireless bluetooth headphones under 500 EGP",
-                         "laptop bag 15 inch waterproof",
-                         "gaming mouse rgb".
-        limit: Maximum number of results to return. Defaults to 5.
-
-    Returns:
-        JSON string containing a list of matching products with name, price,
-        old_price, stock_status, sku, url, and relevance score.
-    """
     store = _get_store()
     embedder = _get_embedder()
 
     vector = embedder.embed_text(query)
+
     results = store.db.hybrid_search(
         store.collection_name,
         query_text=query,
@@ -72,4 +72,25 @@ def search_products(query: str, limit: int = 5) -> str:
         })
 
     logger.info("search_products: query=%r returned %d results", query, len(products))
-    return json.dumps(products, ensure_ascii=False)
+    return products
+
+
+@tool
+def search_products(query: str, limit: int = 7) -> str:
+    """Search RayaShop product catalog using hybrid search (keyword + semantic).
+
+    Use this tool when the user asks to find, search, or look up products.
+    The query should describe what the user is looking for in natural language.
+
+    Args:
+        query: Natural language description of products to find.
+               Examples: "wireless bluetooth headphones under 500 EGP",
+                         "laptop bag 15 inch waterproof",
+                         "gaming mouse rgb".
+        limit: Maximum number of results to return. Defaults to 5.
+
+    Returns:
+        JSON string containing a list of matching products with name, price,
+        old_price, stock_status, sku, url, and relevance score.
+    """
+    return json.dumps(search_products_raw(query, limit), ensure_ascii=False)
