@@ -2,6 +2,7 @@ import json
 from collections.abc import Generator
 from functools import lru_cache
 
+from src.Agent.guardrails import check_input
 from src.Agent.memory import build_graph
 from src.Agent.memory.checkpoint import get_checkpointer
 
@@ -12,6 +13,9 @@ def build_agent():
 
 
 def ask(question: str, thread_id: str = "default") -> str:
+    reply = check_input(question)
+    if reply is not None:
+        return reply
     agent = build_agent()
     result = agent.invoke(
         {"messages": [("human", question)]},
@@ -35,6 +39,11 @@ def _parse_products(content) -> tuple[bool, list[dict]]:
 
 
 def _stream_events(agent, question: str, thread_id: str) -> Generator[dict]:
+    reply = check_input(question)
+    if reply is not None:
+        yield {"type": "token", "text": reply}
+        return
+
     config = {"configurable": {"thread_id": thread_id}}
     for mode, payload in agent.stream(
         {"messages": [("human", question)]},
