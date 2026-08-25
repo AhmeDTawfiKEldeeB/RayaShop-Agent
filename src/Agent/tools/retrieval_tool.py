@@ -1,6 +1,5 @@
 import json
 import logging
-import re
 
 from langchain_core.tools import tool
 
@@ -14,16 +13,7 @@ logger = logging.getLogger(__name__)
 _store: WeaviateProductStore | None = None
 _embedder = None
 
-_GREETINGS = {
-    "hi", "hello", "hey", "ahla", "ahlan", "hola", "salam", "marhaba",
-    "thanks", "thank you", "ok", "okay", "مرحبا", "اهلا", "هلا",
-    "السلام عليكم", "صباح الخير", "مساء الخير", "ازيك", "عامل ايه",
-}
-
-
-def _is_greeting(text: str) -> bool:
-    t = re.sub(r"[^\w\s\u0600-\u06FF]", "", text.strip().lower()).strip()
-    return t in _GREETINGS
+_MIN_VECTOR_SCORE = 0.45
 
 
 def _get_store() -> WeaviateProductStore:
@@ -41,14 +31,16 @@ def _get_embedder():
 
 
 def search_products_raw(query: str, limit: int = 7) -> list[dict]:
-    if _is_greeting(query):
-        logger.info("search_products: greeting %r -> empty", query)
-        return []
-
     store = _get_store()
     embedder = _get_embedder()
 
     vector = embedder.embed_text(query)
+
+    probe = store.db.search(store.collection_name, query_vector=vector, limit=1)
+    top_score = probe[0].score if probe else 0.0
+    if top_score < _MIN_VECTOR_SCORE:
+        logger.info("search_products: query %r below threshold %.3f -> empty", query, top_score)
+        return []
 
     results = store.db.hybrid_search(
         store.collection_name,
