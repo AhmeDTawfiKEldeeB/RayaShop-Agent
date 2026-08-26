@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RayaShop AI Shopping Assistant</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                "colors": {
+                    "surface-container": "#f0eded",
+                    "error": "#ba1a1a",
+                    "surface-container-highest": "#e5e2e1",
+                    "on-error": "#ffffff",
+                    "surface": "#fcf9f8",
+                    "secondary-container": "#d5e3df",
+                    "on-surface-variant": "#3d4943",
+                    "surface-bright": "#fcf9f8",
+                    "on-primary-container": "#f5fff8",
+                    "surface-variant": "#e5e2e1",
+                    "secondary": "#54615e",
+                    "on-secondary-container": "#586562",
+                    "primary-container": "#008563",
+                    "error-container": "#ffdad6",
+                    "primary-fixed": "#89f7cc",
+                    "on-surface": "#1c1b1b",
+                    "inverse-surface": "#313030",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#6d7a73",
+                    "surface-container-low": "#f6f3f2",
+                    "primary-fixed-dim": "#6cdab1",
+                    "on-background": "#1c1b1b",
+                    "primary": "#00694e",
+                    "surface-dim": "#dcd9d9",
+                    "outline-variant": "#bccac2",
+                    "background": "#fcf9f8",
+                    "inverse-on-surface": "#f3f0ef",
+                    "on-primary": "#ffffff",
+                    "brand-accent": "#1A2B3C",
+                    "brand-accent-light": "#F0F4F8"
+                },
+                "borderRadius": {
+                    "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem",
+                    "2xl": "1rem", "3xl": "1.25rem", "full": "9999px"
+                },
+                "spacing": {
+                    "stack-lg": "32px", "stack-sm": "8px", "stack-md": "16px",
+                    "ai-bubble-padding": "12px 16px", "container-margin": "20px", "gutter": "16px"
+                },
+                "fontFamily": { "inter": ["Inter"] },
+                "fontSize": {
+                    "product-name": ["16px", { "lineHeight": "20px", "fontWeight": "500" }],
+                    "app-title": ["17px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                    "section-title": ["12px", { "lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "700" }],
+                    "price-display": ["20px", { "lineHeight": "24px", "fontWeight": "600" }],
+                    "chat-bubble": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+                    "label-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }]
+                }
+            }
+        }
+    }
+</script>
+<style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #dcd9d9; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #bccac2; }
+    .md-body a { color: #00694e; text-decoration: underline; font-weight: 500; }
+    .md-body strong { font-weight: 600; }
+    .typing-dot { animation: blink 1.4s infinite both; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0% { opacity: 0.25; } 50% { opacity: 1; } 100% { opacity: 0.25; } }
+</style>
+</head>
+<body class="bg-surface text-on-surface h-full flex overflow-hidden font-inter">
+
+<!-- Sidebar -->
+<aside class="h-full w-64 hidden md:flex flex-col border-r border-surface-container-highest bg-surface flex-shrink-0 sticky top-0 p-container-margin z-10">
+    <button id="btn-new-session" class="w-full bg-brand-accent rounded-2xl py-3 px-4 flex items-center justify-center gap-2 mb-stack-lg shadow-sm hover:opacity-90 transition-opacity">
+        <span class="material-symbols-outlined text-[20px] text-white">add</span>
+        <span class="text-product-name text-white">New Session</span>
+    </button>
+    <div class="mb-4 flex-1 overflow-y-auto">
+        <h2 class="font-section-title text-section-title text-outline uppercase tracking-wider mb-3">SESSIONS</h2>
+        <nav id="sessions-list" class="space-y-1"></nav>
+    </div>
+    <div class="mt-6 pt-4 border-t border-surface-container-highest flex gap-4">
+        <a class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-label-sm cursor-pointer" href="https://www.rayashop.com" target="_blank">
+            <span class="material-symbols-outlined text-[16px]">storefront</span> RayaShop
+        </a>
+    </div>
+</aside>
+
+<main class="flex-1 flex flex-col md:flex-row h-full overflow-hidden relative">
+    <!-- Chat Panel -->
+    <section class="flex-1 flex flex-col min-w-0 border-r border-surface-container-highest bg-surface relative z-0">
+        <header class="h-[72px] flex-shrink-0 border-b border-surface-container-highest bg-surface/90 backdrop-blur flex items-center px-6 gap-4 z-10">
+            <div class="w-10 h-10 rounded-full bg-brand-accent-light text-primary flex items-center justify-center">
+                <span class="material-symbols-outlined">smart_toy</span>
+            </div>
+            <div>
+                <h1 class="font-app-title text-app-title text-on-surface">RayaShop Assistant</h1>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <div id="status-dot" class="w-2 h-2 rounded-full bg-surface-container-highest"></div>
+                    <span id="status-text" class="font-label-sm text-label-sm text-outline">Connecting...</span>
+                </div>
+            </div>
+        </header>
+
+        <div id="chat-scroll" class="flex-1 overflow-y-auto p-6 space-y-8 pb-32"></div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-surface via-surface to-transparent pt-12 z-20">
+            <div class="max-w-3xl mx-auto relative group">
+                <input id="chat-input" autocomplete="off"
+                    class="w-full bg-surface-container-lowest border border-surface-container-highest rounded-full py-4 pl-6 pr-14 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm text-chat-bubble text-on-surface placeholder-outline-variant disabled:opacity-60"
+                    placeholder="Ask me to find anything..." type="text"/>
+                <button id="btn-send"
+                    class="absolute inset-y-1.5 right-1.5 w-10 h-10 bg-brand-accent hover:opacity-90 rounded-full flex items-center justify-center text-white transition-colors shadow-sm focus:outline-none disabled:opacity-40">
+                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">arrow_upward</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recommendations Panel -->
+    <aside class="w-full md:w-[400px] lg:w-[480px] bg-surface hidden lg:flex flex-col flex-shrink-0 z-10 md:border-l border-surface-container-highest">
+        <header class="p-6 border-b border-surface-container-highest flex justify-between items-start bg-surface/90 backdrop-blur sticky top-0 z-10">
+            <div>
+                <h2 class="font-app-title text-app-title text-on-surface">Curated Recommendations</h2>
+                <p class="font-label-sm text-label-sm text-outline mt-1">Based on your recent request</p>
+            </div>
+        </header>
+        <div id="recs-panel" class="flex-1 overflow-y-auto p-6 space-y-8 pb-24">
+            <div class="flex flex-col items-center justify-center h-full text-center text-outline-variant gap-3">
+                <span class="material-symbols-outlined text-[48px]">package_2</span>
+                <p class="font-label-sm">Ask about a product and results will appear here</p>
+            </div>
+        </div>
+    </aside>
+</main>
+
+<script>
+const FALLBACK_IMG = "data:image/svg+xml," + encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='200' height='200' fill='%23f0eded'/><text x='100' y='110' font-family='Inter' font-size='40' fill='%23bccac2' text-anchor='middle'>🛍️</text></svg>`
+).replace(/'/g, "%27");
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const fmtPrice = (v) => new Intl.NumberFormat("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(v || 0) + " EGP";
+const nowTime = () => new Date().toLocaleTimeString("en-US", {hour:"2-digit", minute:"2-digit", hour12:true});
+
+function mdLite(raw) {
+    let html = esc(raw);
+    html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    html = html.replace(/\[(.+?)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    html = html.replace(/^[\*-] (.+)$/gm, "&bull; $1");
+    return html.replace(/\n/g, "<br>");
+}
+
+let state = loadState();
+function loadState() {
+    try {
+        const raw = localStorage.getItem("rayashop_state");
+        if (raw) { const s = JSON.parse(raw); if (s.sessions && s.sessions.length) return s; }
+    } catch (e) {}
+    const s = { sessions: [], activeId: null };
+    createSessionObj(s);
+    return s;
+}
+function createSessionObj(s) {
+    s.sessions.unshift({ id: crypto.randomUUID().slice(0,8), title: "New Session", messages: [] });
+    s.activeId = s.sessions[0].id;
+}
+const save = () => localStorage.setItem("rayashop_state", JSON.stringify(state));
+const active = () => state.sessions.find(s => s.id === state.activeId);
+
+/* ---------- Sidebar ---------- */
+function renderSessions() {
+    $("sessions-list").innerHTML = state.sessions.map(se => `
+        <a data-id="${se.id}" class="session-item flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-colors truncate ${se.id === state.activeId ? "bg-secondary-container text-on-secondary-container font-semibold scale-[0.98]" : "text-on-surface-variant hover:bg-surface-container-high"}">
+            <span class="material-symbols-outlined text-[20px] ${se.id === state.activeId ? "text-primary" : ""}">chat_bubble</span>
+            <span class="truncate">${esc(se.title)}</span>
+        </a>`).join("");
+    document.querySelectorAll(".session-item").forEach(el =>
+        el.onclick = () => { state.activeId = el.dataset.id; save(); renderAll(); });
+}
+
+$("btn-new-session").onclick = () => { createSessionObj(state); save(); renderAll(); };
+
+/* ---------- Health ---------- */
+async function checkHealth() {
+    try {
+        const r = await fetch("/api/v1/health", {signal: AbortSignal.timeout(4000)});
+        const ok = r.ok;
+        $("status-dot").className = "w-2 h-2 rounded-full " + (ok ? "bg-primary animate-pulse" : "bg-error");
+        $("status-text").textContent = ok ? "Online & Ready to Help" : "Backend Error";
+    } catch (e) {
+        $("status-dot").className = "w-2 h-2 rounded-full bg-error";
+        $("status-text").textContent = "Offline — start uvicorn";
+    }
+}
+
+/* ---------- Chat ---------- */
+function bubbleHTML(msg) {
+    const isUser = msg.role === "user";
+    return isUser ? `
+        <div class="flex gap-4 max-w-3xl ml-auto justify-end">
+            <div class="flex flex-col gap-1 items-end">
+                <div class="bg-surface-container-lowest rounded-2xl rounded-tr-sm p-ai-bubble-padding text-on-surface text-chat-bubble border border-surface-container-highest shadow-sm">${msg.html}</div>
+                <span class="text-[10px] font-semibold text-outline tracking-wider mr-1">YOU • ${msg.time}</span>
+            </div>
+            <div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center flex-shrink-0 mt-1 border border-outline-variant"><span class="material-symbols-outlined text-[18px]">person</span></div>
+        </div>` : `
+        <div class="flex gap-4 max-w-3xl">
+            <div class="w-8 h-8 rounded-full bg-brand-accent-light text-primary flex items-center justify-center flex-shrink-0 mt-1"><span class="material-symbols-outlined text-[18px]">smart_toy</span></div>
+            <div class="flex flex-col gap-1 min-w-0">
+                <div class="md-body bg-brand-accent-light rounded-2xl rounded-tl-sm p-ai-bubble-padding text-on-surface text-chat-bubble border border-primary/10">${msg.html}</div>
+                <span class="text-[10px] font-semibold text-outline tracking-wider ml-1">ASSISTANT • ${msg.time}</span>
+            </div>
+        </div>`;
+}
+
+function addBubble(container, role, html) {
+    const wrap = document.createElement("div");
+    wrap.innerHTML = bubbleHTML({role, html, time: nowTime()});
+    const node = wrap.firstElementChild;
+    container.appendChild(node);
+    scrollChat();
+    return node;
+}
+function setBubbleText(node, html) {
+    node.querySelector(".md-body, .bg-surface-container-lowest").innerHTML = html;
+    scrollChat();
+}
+const scrollChat = () => { const c = $("chat-scroll"); c.scrollTop = c.scrollHeight; };
+
+function renderMessages() {
+    const se = active();
+    const c = $("chat-scroll");
+    c.innerHTML = "";
+    if (!se.messages.length) {
+        c.innerHTML = `
+            <div class="flex gap-4 max-w-3xl">
+                <div class="w-8 h-8 rounded-full bg-brand-accent-light text-primary flex items-center justify-center flex-shrink-0 mt-1"><span class="material-symbols-outlined text-[18px]">smart_toy</span></div>
+                <div class="bg-brand-accent-light rounded-2xl rounded-tl-sm p-ai-bubble-padding text-on-surface text-chat-bubble border border-primary/10">
+                    Hi there! 👋 I'm your RayaShop AI Assistant. Ask me to find any product — headphones, laptops, phones — and I'll search our catalog for real prices and availability.
+                </div>
+            </div>`;
+        return;
+    }
+    se.messages.forEach(m => { c.insertAdjacentHTML("beforeend", bubbleHTML(m)); });
+    scrollChat();
+}
+
+function setBusy(b) {
+    $("btn-send").disabled = b;
+    $("chat-input").disabled = b;
+}
+
+async function sendMessage() {
+    const input = $("chat-input");
+    const text = input.value.trim();
+    if (!text || $("btn-send").disabled) return;
+    input.value = "";
+
+    const se = active();
+    se.messages.push({role: "user", content: text, html: mdLite(text), time: nowTime()});
+    if (se.title === "New Session") {
+        se.title = text.length > 26 ? text.slice(0, 26) + "…" : text;
+        renderSessions();
+    }
+    save();
+    renderMessages();
+
+    setBusy(true);
+    const aiNode = addBubble($("chat-scroll"), "assistant",
+        `<span class="inline-flex gap-1 items-center"><i class="typing-dot w-1.5 h-1.5 bg-outline rounded-full inline-block"></i><i class="typing-dot w-1.5 h-1.5 bg-outline rounded-full inline-block"></i><i class="typing-dot w-1.5 h-1.5 bg-outline rounded-full inline-block"></i></span>`);
+    $("recs-panel").innerHTML = `<div class="flex items-center justify-center gap-3 text-outline py-16"><span class="material-symbols-outlined animate-spin">progress_activity</span><span class="font-label-sm">Searching catalog...</span></div>`;
+
+    let full = "", sawTool = false, sawProducts = false;
+
+    try {
+        const resp = await fetch("/api/v1/chat/stream", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({message: text, thread_id: se.id}),
+        });
+        const reader = resp.body.getReader();
+        const dec = new TextDecoder();
+        let buf = "";
+        while (true) {
+            const {done, value} = await reader.read();
+            if (done) break;
+            buf += dec.decode(value, {stream: true});
+            let idx;
+            while ((idx = buf.indexOf("\n\n")) !== -1) {
+                const line = buf.slice(0, idx).trim();
+                buf = buf.slice(idx + 2);
+                if (!line.startsWith("data: ")) continue;
+                let ev; try { ev = JSON.parse(line.slice(6)); } catch (e) { continue; }
+
+                if (ev.type === "tool" && !sawTool) {
+                    sawTool = true;
+                    setBubbleText(aiNode, `<span class="inline-flex items-center gap-2 text-outline italic"><span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span> Searching products...</span>`);
+                } else if (ev.type === "products" && Array.isArray(ev.products)) {
+                    sawProducts = true;
+                    renderProducts(ev.products);
+                } else if (ev.type === "token") {
+                    full += ev.text || "";
+                    setBubbleText(aiNode, mdLite(full));
+                } else if (ev.type === "error") {
+                    full += `\n\n⚠️ ${ev.text || "Agent error"}`;
+                    setBubbleText(aiNode, mdLite(full));
+                }
+            }
+        }
+        if (!sawProducts) {
+            renderEmpty();
+        }
+    } catch (e) {
+        full = full || "⚠️ Cannot reach the server. Is uvicorn running?";
+        setBubbleText(aiNode, mdLite(full));
+    }
+
+    if (!full.trim()) full = "Sorry, I couldn't generate a response.";
+    se.messages.push({role: "assistant", content: full, html: mdLite(full), time: nowTime()});
+    save();
+    setBusy(false);
+}
+
+$("btn-send").onclick = sendMessage;
+$("chat-input").addEventListener("keydown", (e) => { if (e.key === "Enter") sendMessage(); });
+
+/* ---------- Recommendations ---------- */
+function productCardHTML(p) {
+    const discount = p.old_price && p.old_price > p.price ? Math.round((1 - p.price / p.old_price) * 100) : 0;
+    const inStock = (p.stock_status || "").toUpperCase() === "IN_STOCK";
+    return `
+        <div class="group bg-surface-container-lowest border border-surface-container-highest rounded-[20px] overflow-hidden hover:border-primary/30 transition-all shadow-sm hover:shadow-md relative">
+            <a href="${esc(p.url)}" target="_blank" rel="noopener" class="block">
+                <div class="aspect-square bg-surface-container-low relative overflow-hidden">
+                    <img src="${esc(p.thumbnail || FALLBACK_IMG)}" onerror="this.src='${FALLBACK_IMG}'"
+                        alt="${esc(p.name)}" class="bg-cover bg-center w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"/>
+                    ${discount ? `<span class="absolute top-4 left-4 bg-error text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">-${discount}%</span>` : ""}
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2 gap-2">
+                        <div class="min-w-0">
+                            <h3 class="text-product-name text-on-surface group-hover:text-primary transition-colors line-clamp-2">${esc(p.name)}</h3>
+                            <p class="text-outline text-label-sm mt-0.5">${inStock ? "✅ In Stock" : "❌ Out of Stock"}${p.sku ? " • " + esc(p.sku) : ""}</p>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-brand-accent-light text-primary flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">arrow_outward</span>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2 mt-3">
+                        <div class="font-price-display text-price-display text-primary">${fmtPrice(p.price)}</div>
+                        ${discount ? `<div class="text-label-sm text-outline line-through">${fmtPrice(p.old_price)}</div>` : ""}
+                    </div>
+                </div>
+            </a>
+        </div>`;
+}
+
+function productGridItemHTML(p) {
+    const discount = p.old_price && p.old_price > p.price ? Math.round((1 - p.price / p.old_price) * 100) : 0;
+    return `
+        <a href="${esc(p.url)}" target="_blank" rel="noopener" class="group cursor-pointer block">
+            <div class="aspect-square bg-surface-container-low rounded-[16px] overflow-hidden relative border border-surface-container-highest group-hover:border-primary/30 transition-all mb-3">
+                <img src="${esc(p.thumbnail || FALLBACK_IMG)}" onerror="this.src='${FALLBACK_IMG}'"
+                    alt="${esc(p.name)}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"/>
+                ${discount ? `<span class="absolute top-2 left-2 bg-error text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">-${discount}%</span>` : ""}
+            </div>
+            <div class="px-1">
+                <p class="text-[10px] font-bold uppercase tracking-wider mb-1 ${(p.stock_status||"").toUpperCase()==="IN_STOCK" ? "text-primary" : "text-error"}">${(p.stock_status||"").toUpperCase()==="IN_STOCK" ? "IN STOCK" : "OUT OF STOCK"}</p>
+                <h4 class="text-[14px] leading-tight text-on-surface group-hover:text-primary transition-colors line-clamp-1 mb-1">${esc(p.name)}</h4>
+                <div class="font-semibold text-[15px] text-primary">${fmtPrice(p.price)}</div>
+            </div>
+        </a>`;
+}
+
+function renderEmpty() {
+    $("recs-panel").innerHTML = `<div class="flex flex-col items-center justify-center h-full text-center text-outline-variant gap-3"><span class="material-symbols-outlined text-[48px]">package_2</span><p class="font-label-sm">Ask about a product and results will appear here</p></div>`;
+}
+function renderProducts(products) {
+    const panel = $("recs-panel");
+    if (!products.length) {
+        panel.innerHTML = `<div class="flex flex-col items-center text-outline-variant gap-3 pt-16 text-center"><span class="material-symbols-outlined text-[40px]">search_off</span><p class="font-label-sm">No products found for this request</p></div>`;
+        return;
+    }
+    const [best, ...rest] = products;
+    panel.innerHTML = `
+        <div>
+            <div class="flex items-center gap-2 mb-3">
+                <span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+                <span class="font-section-title text-section-title text-primary uppercase tracking-wider">Best Match</span>
+            </div>
+            ${productCardHTML(best)}
+        </div>
+        ${rest.length ? `
+        <div>
+            <h3 class="font-section-title text-section-title text-outline uppercase tracking-wider mb-4">More Options</h3>
+            <div class="grid grid-cols-2 gap-4">${rest.map(productGridItemHTML).join("")}</div>
+        </div>` : ""}`;
+}
+
+/* ---------- Boot ---------- */
+function renderAll() { renderSessions(); renderMessages(); $("recs-panel").innerHTML = `<div class="flex flex-col items-center justify-center h-full text-center text-outline-variant gap-3"><span class="material-symbols-outlined text-[48px]">package_2</span><p class="font-label-sm">Ask about a product and results will appear here</p></div>`; }
+renderAll();
+setBusy(false);
+checkHealth();
+setInterval(checkHealth, 15000);
+console.log("RayaShop frontend ready");
+</script>
+</body></html>
