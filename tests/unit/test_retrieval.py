@@ -5,8 +5,16 @@ from unittest.mock import MagicMock, patch
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
-from src.Agent.nodes.retrieval import _get_latest_user_message, retrieval_node
-from src.Agent.tools.retrieval_tool import format_search_results, search_products_raw
+from src.Agent.nodes.retrieval import (
+    _get_latest_user_message,
+    _is_followup_question,
+    retrieval_node,
+)
+from src.Agent.tools.retrieval_tool import (
+    _rerank,
+    format_search_results,
+    search_products_raw,
+)
 
 # --------------------------------------------------------------------------- _get_latest_user_message
 
@@ -76,6 +84,66 @@ class TestRetrievalNode:
 
         mock_search.assert_not_called()
         assert result["search_results"] == []
+
+    def test_followup_keeps_existing_results(self):
+        existing = [{"name": "Headphone", "price": 1000}]
+        state = {
+            "messages": [HumanMessage(content="what colors does it come in?")],
+            "search_results": existing,
+        }
+
+        with patch("src.Agent.nodes.retrieval.search_products_raw") as mock_search:
+            result = retrieval_node(state)
+
+        mock_search.assert_not_called()
+        assert result["search_results"] == existing
+
+    def test_followup_arabic_keeps_existing_results(self):
+        existing = [{"name": "تكييف", "price": 15000}]
+        state = {
+            "messages": [HumanMessage(content="لونه ايه؟")],
+            "search_results": existing,
+        }
+
+        with patch("src.Agent.nodes.retrieval.search_products_raw") as mock_search:
+            result = retrieval_node(state)
+
+        mock_search.assert_not_called()
+        assert result["search_results"] == existing
+
+    def test_new_product_intent_still_searches(self):
+        state = {
+            "messages": [HumanMessage(content="do you have samsung phones?")],
+            "search_results": [{"name": "old"}],
+        }
+
+        with patch("src.Agent.nodes.retrieval.search_products_raw", return_value=[]) as mock_search:
+            retrieval_node(state)
+
+        mock_search.assert_called_once()
+        assert mock_search.call_args.kwargs["query"] == "do you have samsung phones?"
+
+    def test_followup_without_existing_results_searches(self):
+        state = {"messages": [HumanMessage(content="what colors?")]}
+
+        with patch("src.Agent.nodes.retrieval.search_products_raw", return_value=[]) as mock_search:
+            retrieval_node(state)
+
+        mock_search.assert_called_once()
+
+
+class TestIsFollowupQuestion:
+    def test_english_followup(self):
+        assert _is_followup_question("what colors does it come in?")
+
+    def test_english_new_product(self):
+        assert not _is_followup_question("show me asus laptop")
+
+    def test_arabic_followup(self):
+        assert _is_followup_question("لونه ايه؟")
+
+    def test_arabic_new_product(self):
+        assert not _is_followup_question("عايز لابتوب")
 
 
 # --------------------------------------------------------------------------- search_products_raw
@@ -149,7 +217,8 @@ class TestSearchProductsRaw:
             search_products_raw("phone", limit=3)
 
         call_kwargs = mock_store.db.hybrid_search.call_args
-        assert call_kwargs[1]["limit"] == 3
+        # candidate pool is inflated (max(limit*3, 12)) so re-ranking has options
+        assert call_kwargs[1]["limit"] == 12
 
     def test_handles_empty_payload_fields(self):
         mock_result = MagicMock()
@@ -232,3 +301,52 @@ class TestFormatSearchResults:
         products = [{"name": "موبايل سامسونج"}]
         result = format_search_results(products)
         assert "موبايل سامسونج" in result
+
+
+class TestReRank:
+    def test_empty(self):
+        assert _rerank("laptop", []) == []
+
+    def test_real_product_beats_accessory_for_laptop_query(self):
+        products = [
+            {"name": "Laptop Charger For ASUS Laptops - Black", "category": "Laptops & PCs",
+             "thumbnail": "x", "stock_status": "IN_STOCK", "score": 0.9},
+            {"name": "ASUS TUF A14 Gaming Laptop AMD Ryzen 9", "category": "Electronics",
+             "thumbnail": "y", "stock_status": "IN_STOCK", "score": 0.75},
+        ]
+        ranked = _rerank("asus laptop", products)
+        assert "Gaming Laptop" in ranked[0]["name"]
+        assert "Charger" in ranked[1]["name"]
+
+    def test_irrelevant_item_demoted_for_laptop_query(self):
+        products = [
+            {"name": "ASUS TUF A14 Gaming Laptop", "category": "Electronics",
+             "thumbnail": "y", "stock_status": "IN_STOCK", "score": 0.7},
+            {"name": "EA Sports FC 26 for PlayStation", "category": "Electronics",
+             "thumbnail": "z", "stock_status": "IN_STOCK", "score": 0.85},
+        ]
+        ranked = _rerank("asus laptop", products)
+        assert "Gaming Laptop" in ranked[0]["name"]
+        assert "EA Sports" in ranked[1]["name"]
+
+    def test_marketing_category_demoted(self):
+        products = [
+            {"name": "Foldable Laptop Stand", "category": "Laptops & PCs",
+             "thumbnail": "a", "stock_status": "IN_STOCK", "score": 0.8},
+            {"name": "Lenovo LOQ Gaming Laptop", "category": "Laptops",
+             "thumbnail": "b", "stock_status": "IN_STOCK", "score": 0.7},
+        ]
+        ranked = _rerank("laptop", products)
+        # marketing/accessory noise demoted below real laptop
+        assert "Gaming Laptop" in ranked[0]["name"]
+
+    def test_has_image_in_stock_prefer_for_best_match(self):
+        products = [
+            {"name": "HP OMEN Laptop", "category": "Laptops",
+             "thumbnail": "", "stock_status": "OUT_OF_STOCK", "score": 0.8},
+            {"name": "Dell XPS Laptop", "category": "Laptops",
+             "thumbnail": "d", "stock_status": "IN_STOCK", "score": 0.6},
+        ]
+        ranked = _rerank("laptop", products)
+        # Dell (has image + in stock) surfaces to front via best-first
+        assert "Dell" in ranked[0]["name"]
