@@ -1,5 +1,5 @@
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter
 
@@ -21,6 +21,6 @@ async def health_check() -> HealthResponse:
             status="ok",
             version=API_VERSION,
             uptime_seconds=time.monotonic() - _START_TIME,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         ),
     )
