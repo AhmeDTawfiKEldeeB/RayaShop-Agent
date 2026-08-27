@@ -1,11 +1,15 @@
+from typing import ClassVar
+
 from src.config.settings import settings
 from src.infrastructure.embeddings.interface import EmbeddingProvider
 from src.infrastructure.embeddings.providers.gemini import GeminiEmbeddingProvider
-from src.infrastructure.embeddings.providers.huggingface import HuggingFaceEmbeddingProvider
+from src.infrastructure.embeddings.providers.huggingface import (
+    HuggingFaceEmbeddingProvider,
+)
 
 
 class EmbeddingFactory:
-    _providers: dict[str, type[EmbeddingProvider]] = {
+    _providers: ClassVar[dict[str, type[EmbeddingProvider]]] = {
         "huggingface": HuggingFaceEmbeddingProvider,
         "gemini": GeminiEmbeddingProvider,
     }
