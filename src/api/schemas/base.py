@@ -1,14 +1,14 @@
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from pydantic import BaseModel, Field
 
 T = TypeVar("T")
 
 
-class StandardResponse(BaseModel, Generic[T]):
+class StandardResponse[MT](BaseModel):
     status: str = Field(..., description="Status of the response, e.g. 'success' or 'error'")
     message: str = Field(..., description="Human-readable message describing the result")
-    data: T | None = Field(None, description="Payload of the response")
+    data: MT | None = Field(None, description="Payload of the response")
 
 
 class ErrorResponse(BaseModel):
