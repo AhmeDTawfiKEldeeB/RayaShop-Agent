@@ -2,10 +2,12 @@ import logging
 
 from src.Agent.memory.summarise import summarize_if_needed
 from src.Agent.state import AgentState
+from src.Agent.trace import traceable
 
 logger = logging.getLogger(__name__)
 
 
+@traceable(name="memory_node", run_type="chain")
 def memory_node(state: AgentState) -> dict:
     """Check message count and summarize old messages if threshold exceeded.
 
