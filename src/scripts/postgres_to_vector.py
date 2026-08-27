@@ -9,8 +9,7 @@ from src.infrastructure.vector_db.stores.weaviate_product_store import (
 )
 
 
-EMBED_BATCH = 100
-UPSERT_BATCH = 128
+EMBED_BATCH = 128
 
 
 def build_embedding_text(
@@ -122,7 +121,8 @@ def main() -> None:
         )
 
         print(
-            f"Found {total} products in Postgres"
+            f"Found {total} products in Postgres",
+            flush=True,
         )
 
     finally:
@@ -132,7 +132,8 @@ def main() -> None:
     if total == 0:
 
         print(
-            "No products to ingest"
+            "No products to ingest",
+            flush=True,
         )
 
         store.close()
@@ -140,12 +141,20 @@ def main() -> None:
         return
 
     # =========================================================
-    # WEAVIATE
+    # WEAVIATE — drop and recreate collection
     # =========================================================
 
     store.ping()
 
-    store.ensure_collection()
+    name = store.collection_name
+    old_count = store.db.count(name)
+    print(f"Deleting old collection '{name}' ({old_count} objects)...")
+    store.db.delete_collection(name)
+    print("Deleted")
+
+    print(f"Creating new collection '{name}'...")
+    store.create_collection()
+    print("Created")
 
     # =========================================================
     # LOAD EMBEDDING MODEL
