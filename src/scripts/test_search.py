@@ -1,5 +1,7 @@
 from src.infrastructure.embeddings.factory import EmbeddingFactory
-from src.infrastructure.vector_db.stores.weaviate_product_store import WeaviateProductStore
+from src.infrastructure.vector_db.stores.weaviate_product_store import (
+    WeaviateProductStore,
+)
 
 
 def main() -> None:
