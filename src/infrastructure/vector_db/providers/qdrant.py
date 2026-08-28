@@ -66,8 +66,11 @@ class QdrantDB(VectorStore):
             vectors_config=qdrant_models.VectorParams(
                 size=vector_size, distance=_DISTANCE_MAP[distance]
             ),
+            sparse_vectors_config={
+                "sparse": qdrant_models.SparseVectorParams()
+            }
         )
-        logger.info("Created collection '%s' (size=%s, distance=%s)", collection_name, vector_size, distance)
+        logger.info("Created collection '%s' (size=%s, distance=%s) with sparse vector config", collection_name, vector_size, distance)
 
     def ensure_collection(
         self,
@@ -88,27 +91,39 @@ class QdrantDB(VectorStore):
         logger.info("Deleted collection '%s'", collection_name)
 
     def upsert(self, collection_name: str, records: list[VectorRecord]) -> None:
-        points = [
-            qdrant_models.PointStruct(
-                id=record.id,
-                vector=record.vector,
-                payload=record.payload,
+        points = []
+        for record in records:
+            if isinstance(record.vector, dict):
+                vector_data = {}
+                for name, vec in record.vector.items():
+                    if name == "sparse":
+                        if isinstance(vec, dict):
+                            vector_data[name] = qdrant_models.SparseVector(
+                                indices=vec["indices"], values=vec["values"]
+                            )
+                        elif hasattr(vec, "indices") and hasattr(vec, "values"):
+                            vector_data[name] = qdrant_models.SparseVector(
+                                indices=list(vec.indices), values=list(vec.values)
+                            )
+                        else:
+                            vector_data[name] = vec
+                    else:
+                        vector_data[name] = vec
+            else:
+                vector_data = record.vector
+
+            points.append(
+                qdrant_models.PointStruct(
+                    id=record.id,
+                    vector=vector_data,
+                    payload=record.payload,
+                )
             )
-            for record in records
-        ]
         self._upsert_points(collection_name, points)
 
     def upsert_one(self, collection_name: str, record: VectorRecord) -> None:
-        self._upsert_points(
-            collection_name,
-            [
-                qdrant_models.PointStruct(
-                    id=record.id,
-                    vector=record.vector,
-                    payload=record.payload,
-                )
-            ],
-        )
+        self.upsert(collection_name, [record])
+
 
     def upsert_many(
         self,
@@ -171,13 +186,71 @@ class QdrantDB(VectorStore):
         limit: int = 10,
         alpha: float = 0.5,
         filter: Filter | None = None,
+        query_properties: list[str] | None = None,
     ) -> list[SearchResult]:
-        logger.warning(
-            "Qdrant does not support keyword fusion without a text index, "
-            "falling back to semantic search for query=%r",
-            query_text,
+        # If alpha is 1.0 (pure vector search), bypass sparse vector search entirely
+        if alpha == 1.0:
+            return self.search(
+                collection_name=collection_name,
+                query_vector=query_vector,
+                limit=limit,
+                filter=filter,
+            )
+
+        # Lazy initialize fastembed sparse model
+        if not hasattr(self, "_sparse_model"):
+            from fastembed import SparseTextEmbedding
+            self._sparse_model = SparseTextEmbedding(model_name="Qdrant/bm25")
+
+        # Generate sparse vector for query_text
+        sparse_vecs = list(self._sparse_model.embed([query_text]))
+        if not sparse_vecs:
+            # Fall back to dense vector search if no sparse vector generated
+            return self.search(
+                collection_name=collection_name,
+                query_vector=query_vector,
+                limit=limit,
+                filter=filter,
+            )
+
+        sparse_vec = sparse_vecs[0]
+        qdrant_sparse_vector = qdrant_models.SparseVector(
+            indices=list(sparse_vec.indices),
+            values=list(sparse_vec.values)
         )
-        return self.search(collection_name, query_vector=query_vector, limit=limit, filter=filter)
+
+        # Query Qdrant using native Prefetch and Fusion (RRF)
+        result = self._client.query_points(
+            collection_name=collection_name,
+            prefetch=[
+                qdrant_models.Prefetch(
+                    query=query_vector,
+                    using="",
+                    limit=limit * 3,
+                ),
+                qdrant_models.Prefetch(
+                    query=qdrant_sparse_vector,
+                    using="sparse",
+                    limit=limit * 3,
+                )
+            ],
+            query=qdrant_models.FusionQuery(
+                fusion=qdrant_models.Fusion.RRF
+            ),
+            limit=limit,
+            query_filter=self._to_qdrant_filter(filter),
+        )
+
+        return [
+            SearchResult(
+                id=point.id,
+                score=point.score,
+                payload=point.payload or {},
+            )
+            for point in result.points
+        ]
+
+
 
     def retrieve(
         self,
