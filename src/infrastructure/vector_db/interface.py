@@ -89,6 +89,7 @@ class VectorStore(ABC):
         limit: int = 10,
         alpha: float = 0.5,
         filter: Filter | None = None,
+        query_properties: list[str] | None = None,
     ) -> list[SearchResult]:
         ...
 
