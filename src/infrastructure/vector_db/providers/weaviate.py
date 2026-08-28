@@ -301,12 +301,20 @@ class WeaviateDB(VectorStore):
         limit: int = 10,
         alpha: float = 0.5,
         filter: Filter | None = None,
+        query_properties: list[str] | None = None,
     ) -> list[SearchResult]:
+        props = query_properties
+        # If no query properties are specified, default to a powerful e-commerce set
+        # with field-level weights/boosting.
+        if props is None and "RayaShopProduct" in collection_name:
+            props = ["name^3", "brand^2", "category", "description", "short_description"]
+
         results = self._collection(collection_name).query.hybrid(
             query=query_text,
             vector=query_vector,
             alpha=alpha,
             limit=limit,
+            query_properties=props,
             filters=self._to_weaviate_filter(filter),
             return_metadata=["score"],
         )
@@ -320,6 +328,7 @@ class WeaviateDB(VectorStore):
             for object_ in results.objects
             for record_id, score, payload in [_extract_hybrid_result(object_)]
         ]
+
 
     def retrieve(
         self,
