@@ -33,7 +33,7 @@ The system is built around a **LangGraph ReAct agent** with three tools: product
 | Landing Page | Chat UI |
 |:---:|:---:|
 | ![Landing Page](assets/Screenshot%202026-08-30%20201932.png) | ![Chat UI](assets/Screenshot%202026-08-30%20202108.png) |
-| *React landing page with animated robot mascot, CTA buttons, and HLS video background* | *Three-panel chat UI: session sidebar · conversation area · real-time product recommendations panel* |
+
 
 ---
 
