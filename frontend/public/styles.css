@@ -373,19 +373,49 @@ body {
 
 /* Chat Message Row */
 .message-row {
-    display: flex;
+    display: flex !important;
     gap: 12px;
     max-width: 80%;
+    direction: ltr !important;
     animation: slideUp 0.3s ease-out;
 }
 
-.message-row.user {
-    align-self: flex-end;
-    flex-direction: row-reverse;
+.message-row.assistant {
+    align-self: flex-start !important;
+    flex-direction: row !important;
 }
 
-.message-row.assistant {
-    align-self: flex-start;
+.message-row.user {
+    align-self: flex-end !important;
+    flex-direction: row-reverse !important;
+}
+
+.message-row.assistant .msg-body {
+    align-items: flex-start !important;
+    text-align: left;
+}
+
+.message-row.user .msg-body {
+    align-items: flex-end !important;
+    text-align: right;
+}
+
+.message-row.assistant .msg-meta {
+    text-align: left !important;
+}
+
+.message-row.user .msg-meta {
+    text-align: right !important;
+}
+
+.msg-bubble[dir="rtl"] {
+    text-align: right;
+    direction: rtl;
+}
+
+.msg-bubble[dir="ltr"] {
+    text-align: left;
+    direction: ltr;
 }
 
 .msg-avatar {
