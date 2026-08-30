@@ -217,10 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function addMessage(content, role) {
         const row = document.createElement('div');
         row.className = `message-row ${role}`;
-
-        if (containsArabic(content)) {
-            row.setAttribute('dir', 'rtl');
-        }
+        const isArabic = containsArabic(content);
 
         const timeStr = getCurrentTime();
         const avatarIcon = role === 'user' ? '<i class="fas fa-user"></i>' : '<svg width="16" height="16" viewBox="0 0 60 40" fill="none"><polygon points="14,0 26,20 2,20" fill="#0055ff"/><polygon points="26,0 38,20 14,20" fill="#0033a0"/><polygon points="38,0 50,20 26,20" fill="#0055ff"/></svg>';
@@ -230,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="msg-avatar">${avatarIcon}</div>
             <div class="msg-body">
                 <div class="msg-meta">${roleLabel} • ${timeStr}</div>
-                <div class="msg-bubble">${escapeHtml(content)}</div>
+                <div class="msg-bubble" dir="${isArabic ? 'rtl' : 'ltr'}">${escapeHtml(content)}</div>
             </div>
         `;
 
