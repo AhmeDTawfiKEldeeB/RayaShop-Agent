@@ -19,7 +19,7 @@ def get_checkpointer() -> Any:
     if _checkpointer is None:
         try:
             conn_info = f"postgresql://{settings.postgres.user}:{settings.postgres.password}@{settings.postgres.host}:{settings.postgres.port}/{settings.postgres.database}"
-            _pool = ConnectionPool(conninfo=conn_info, max_size=5, open=True, timeout=2.0)
+            _pool = ConnectionPool(conninfo=conn_info, max_size=5, open=True, timeout=2.0, kwargs={"autocommit": True})
             _checkpointer = PostgresSaver(_pool)
             _checkpointer.setup()
             logger.info("PostgreSQL checkpointer connected successfully.")
