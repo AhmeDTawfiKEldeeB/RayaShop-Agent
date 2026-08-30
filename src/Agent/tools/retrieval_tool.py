@@ -7,7 +7,8 @@ from langchain_core.tools import tool
 
 from src.config.settings import settings
 from src.infrastructure.embeddings.factory import EmbeddingFactory
-from src.infrastructure.vector_db.providers.weaviate import WeaviateDB
+from src.infrastructure.vector_db.factory import VectorDBFactory
+from src.infrastructure.vector_db.interface import VectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -62,16 +63,18 @@ def _get_embedder() -> Any:
     return _embedder
 
 
-def _get_db() -> WeaviateDB:
-    """Get or initialize the Weaviate database client."""
+def _get_db() -> VectorStore:
+    """Get or initialize the database client dynamically."""
     global _db
     if _db is None:
-        _db = WeaviateDB()
+        provider = settings.vector_db_provider
+        logger.info("Initializing vector database provider: %s", provider)
+        _db = VectorDBFactory.create(provider)
     return _db
 
 
 def close_db() -> None:
-    """Close the Weaviate database connection if initialized."""
+    """Close the database connection if initialized."""
     global _db
     if _db is not None:
         try:
@@ -83,7 +86,7 @@ def close_db() -> None:
 
 @tool
 def retrieve_products(query: str, limit: int = 5) -> str:
-    """Retrieve products matching the query from the RayaShop Weaviate vector database.
+    """Retrieve products matching the query from the active Vector Database.
 
     Args:
         query: The search query (e.g. "refrigerator", "water dispenser", "iPhone").
@@ -129,10 +132,17 @@ def retrieve_products(query: str, limit: int = 5) -> str:
             alpha = 0.5
             logger.info("English query detected. Using balanced hybrid search (alpha=0.5).")
 
-        collection_name = settings.weaviate.product_collection_name
+        # Step 4: Resolve collection name and query properties based on provider
+        provider = settings.vector_db_provider.lower()
+        if provider == "qdrant":
+            collection_name = settings.qdrant.collection_name
+        else:
+            collection_name = settings.weaviate.product_collection_name
+
         logger.info(
-            "Performing hybrid search on collection: %s with limit: %d and alpha: %.2f",
+            "Performing search on collection: %s (%s) with limit: %d and alpha: %.2f",
             collection_name,
+            provider,
             limit,
             alpha,
         )
@@ -147,6 +157,9 @@ def retrieve_products(query: str, limit: int = 5) -> str:
 
         retrieved_items = []
         for r in results:
+            # Ignore low-relevance vector noise if score is below threshold
+            if r.score < 0.15:
+                continue
             # Reconstruct the item details including the database ID and search score
             item = {
                 "id": r.id,
@@ -175,3 +188,9 @@ def retrieve_products(query: str, limit: int = 5) -> str:
     except Exception as exc:
         logger.exception("Error during product retrieval")
         return json.dumps({"error": str(exc)}, ensure_ascii=False)
+
+
+def search_products_raw(query: str, limit: int = 7) -> list[dict]:
+    """Search products and return raw dict results (for API use, not as a tool)."""
+    result_str = retrieve_products.invoke({"query": query, "limit": limit})
+    return json.loads(result_str)
