@@ -19,7 +19,20 @@ async def chat(request: ChatRequest):
     final_ai_msg = ""
     for msg in reversed(result.get("messages", [])):
         if msg.type == "ai":
-            final_ai_msg = msg.content
+            if isinstance(msg.content, str):
+                final_ai_msg = msg.content
+            elif isinstance(msg.content, list):
+                text_parts = []
+                for part in msg.content:
+                    if isinstance(part, dict) and "text" in part:
+                        text_parts.append(part["text"])
+                    elif isinstance(part, str):
+                        text_parts.append(part)
+                final_ai_msg = "\n".join(text_parts) if text_parts else str(msg.content)
+            elif isinstance(msg.content, dict) and "text" in msg.content:
+                final_ai_msg = msg.content["text"]
+            else:
+                final_ai_msg = str(msg.content)
             break
             
     products = []
@@ -27,7 +40,11 @@ async def chat(request: ChatRequest):
     for msg in reversed(result.get("messages", [])):
         if msg.type == "tool":
             try:
-                data = json.loads(msg.content)
+                content = msg.content
+                if isinstance(content, str):
+                    data = json.loads(content)
+                else:
+                    data = content
                 if isinstance(data, list) and len(data) > 0:
                     tool_products = []
                     for item in data:
@@ -44,3 +61,4 @@ async def chat(request: ChatRequest):
         response=final_ai_msg,
         products=products
     )
+
