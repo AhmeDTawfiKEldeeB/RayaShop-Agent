@@ -16,11 +16,23 @@ logging.basicConfig(level=logging.INFO)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Auto-create tables if dropped
+    try:
+        from src.db.session import engine
+        from src.db.models.base import Base
+        import src.db.models.product
+        import src.db.models.product_image
+        Base.metadata.create_all(bind=engine)
+        logging.getLogger(__name__).info("Database tables verified/created successfully.")
+    except Exception as exc:
+        logging.getLogger(__name__).warning("Database table creation skipped or failed: %s", exc)
+
     get_checkpointer()
     try:
         from src.Agent.tools.retrieval_tool import _get_embedder
         _get_embedder().embed_text("warmup")
         logging.getLogger(__name__).info("Embedder model loaded and warmed up successfully.")
+
     except Exception as exc:  # noqa: BLE001
         logging.getLogger(__name__).warning("Embedder warmup failed: %s", exc)
 
