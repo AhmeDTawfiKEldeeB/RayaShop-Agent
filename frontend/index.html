@@ -1,120 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RayaShop AI Shopping Concierge</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <div class="app-container">
-        <!-- LEFT PANEL: Modern Sessions Sidebar -->
-        <aside class="left-sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-brand">
-                    <svg width="32" height="20" viewBox="0 0 60 40" fill="none">
-                        <polygon points="14,0 26,20 2,20" fill="#0055ff"/>
-                        <polygon points="26,0 38,20 14,20" fill="#0033a0"/>
-                        <polygon points="38,0 50,20 26,20" fill="#0055ff"/>
-                    </svg>
-                    <span class="brand-name">RAYA <span class="brand-badge">AI</span></span>
-                </div>
-            </div>
-
-            <button class="new-session-btn" id="newSessionBtn">
-                <i class="fas fa-plus"></i>
-                <span>New Chat</span>
-            </button>
-
-            <div class="sessions-section">
-                <div class="sessions-header">RECENT CHATS</div>
-                <div class="sessions-list" id="sessionsList">
-                    <!-- Dynamic modern session cards -->
-                </div>
-            </div>
-
-            <div class="sidebar-footer">
-                <div class="user-pill">
-                    <div class="user-avatar"><i class="fas fa-user-gear"></i></div>
-                    <div class="user-info">
-                        <span class="user-name">Raya Guest</span>
-                        <span class="user-status">Online</span>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- CENTER PANEL: Chat Area -->
-        <main class="chat-area">
-            <!-- Chat Header -->
-            <header class="chat-header">
-                <div class="assistant-avatar">
-                    <svg width="22" height="22" viewBox="0 0 60 40" fill="none">
-                        <polygon points="14,0 26,20 2,20" fill="#0055ff"/>
-                        <polygon points="26,0 38,20 14,20" fill="#0033a0"/>
-                        <polygon points="38,0 50,20 26,20" fill="#0055ff"/>
-                    </svg>
-                </div>
-                <div class="header-info">
-                    <h2>Shopping Concierge AI</h2>
-                    <p class="status-online"><span class="status-dot"></span> Online & Ready to Help</p>
-                </div>
-            </header>
-
-            <!-- Messages Container -->
-            <div class="messages-container" id="messagesContainer">
-                <div class="initial-greeting" id="initialGreeting">
-                    <div class="greeting-icon">
-                        <svg width="140" height="80" viewBox="0 0 160 80" fill="none">
-                            <rect width="160" height="80" rx="16" fill="#0055ff"/>
-                            <polygon points="100,16 116,38 84,38" fill="#ffffff"/>
-                            <polygon points="116,16 132,38 100,38" fill="#ffffff"/>
-                            <polygon points="132,16 148,38 116,38" fill="#ffffff"/>
-                            <text x="20" y="62" font-family="'Segoe UI', sans-serif" font-weight="900" font-size="34" fill="#ffffff" letter-spacing="2">RAYA</text>
-                        </svg>
-                    </div>
-                    <h1>Hi Raya Guest!</h1>
-                    <p>What are you looking for today? Tell me what product, brand, or budget you have in mind.</p>
-                </div>
-            </div>
-
-            <!-- Input Bar -->
-            <div class="input-container">
-                <div class="input-wrapper">
-                    <input type="text" id="messageInput" placeholder="Ask me to find anything..." autocomplete="off">
-                    <button class="send-btn" id="sendBtn">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
-        </main>
-
-        <!-- RIGHT PANEL: Curated Product Recommendations -->
-        <aside class="product-panel" id="productPanel">
-            <div class="panel-header">
-                <div>
-                    <h2>Curated Recommendations</h2>
-                    <p class="subtitle">Based on your recent request</p>
-                </div>
-                <button id="closeProductPanel" class="mobile-close-btn"><i class="fas fa-times"></i></button>
-            </div>
-            
-            <div class="products-scroll-area" id="productsScrollArea">
-                <div class="empty-products" id="emptyProducts">
-                    <i class="fas fa-bag-shopping"></i>
-                    <p>Recommended products will appear here when you chat with the concierge.</p>
-                </div>
-                <div class="products-grid-layout" id="productsGridLayout" style="display: none;">
-                    <div class="featured-product-slot" id="featuredProductSlot"></div>
-                    <div class="grid-products-slot" id="gridProductsSlot"></div>
-                </div>
-            </div>
-        </aside>
-
-        <button class="toggle-products-btn" id="toggleProductsBtn"><i class="fas fa-shopping-bag"></i></button>
-    </div>
-
-    <script src="app.js"></script>
-</body>
+<html lang="en" class="dark scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Raya Shop AI — Your Smart Shopping Assistant</title>
+    <meta name="description" content="Experience the next generation of AI shopping. Discover curated tech, smart appliances, and personalized recommendations with Raya Shop AI." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="/assets/main-C0HW9h6N.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/main-DbxL56Q0.css">
+  </head>
+  <body class="bg-black text-white selection:bg-[#3054ff] selection:text-white antialiased overflow-x-hidden">
+    <div id="root"></div>
+  </body>
 </html>
