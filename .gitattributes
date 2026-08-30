@@ -21,3 +21,4 @@ package-lock.json      linguist-generated=true
 
 # Node modules (should already be gitignored, safety net)
 node_modules/**        linguist-vendored=true
+
