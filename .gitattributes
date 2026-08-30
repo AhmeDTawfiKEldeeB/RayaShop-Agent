@@ -1,0 +1,23 @@
+﻿# Tell GitHub Linguist to treat these as non-code so Python ranks first
+
+# Large generated/debug HTML files
+src/scripts/rayaScripts/raya_product_debug.html linguist-generated=true
+
+# Built frontend dist output (generated, not hand-written code)
+frontend/dist/**  linguist-generated=true
+
+# Frontend public static HTML templates (markup, not code)
+frontend/public/*.html linguist-documentation=true
+frontend/chat.html     linguist-documentation=true
+frontend/index.html    linguist-documentation=true
+index.html             linguist-documentation=true
+
+# Alembic migration template (not real code)
+src/db/migration/script.py.mako linguist-vendored=true
+
+# Lock files
+uv.lock                linguist-generated=true
+package-lock.json      linguist-generated=true
+
+# Node modules (should already be gitignored, safety net)
+node_modules/**        linguist-vendored=true
