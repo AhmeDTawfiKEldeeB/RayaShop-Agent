@@ -31,8 +31,31 @@ export default function App() {
   }, []);
 
   return (
-    <div className="relative bg-[#000000] text-white min-h-screen flex flex-col items-center justify-center overflow-hidden font-sans select-none px-4">
-      {/* Background Video Layer */}
+    <div className="relative bg-[#000000] text-white min-h-screen flex flex-col justify-between overflow-hidden font-sans select-none px-4">
+      {/* 1. Minimal Top Navbar with Sunburst Icon + RAYA SHOP */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-transparent px-6 sm:px-10 py-5 flex items-center">
+        <a href="/" className="flex items-center gap-3 text-white focus:outline-none group">
+          {/* Sunburst Icon (24x24px SVG) */}
+          <div className="w-6 h-6 flex items-center justify-center text-white">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="4" fill="currentColor"/>
+              <path d="M12 2v2"/>
+              <path d="M12 20v2"/>
+              <path d="m4.93 4.93 1.41 1.41"/>
+              <path d="m17.66 17.66 1.41 1.41"/>
+              <path d="M2 12h2"/>
+              <path d="M20 12h2"/>
+              <path d="m6.34 17.66-1.41 1.41"/>
+              <path d="m19.07 4.93-1.41 1.41"/>
+            </svg>
+          </div>
+          <span className="font-black tracking-wider text-xl sm:text-2xl text-white uppercase font-sans">
+            RAYA SHOP
+          </span>
+        </a>
+      </header>
+
+      {/* 2. Background Video Layer */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <video
           ref={videoRef}
@@ -52,8 +75,8 @@ export default function App() {
         <div className="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] rounded-full bg-indigo-900/20 blur-[120px] mix-blend-screen pointer-events-none" />
       </div>
 
-      {/* Hero Content (Centered) */}
-      <main className="relative z-10 max-w-4xl mx-auto w-full flex flex-col items-center text-center py-10">
+      {/* 3. Hero Content (Centered) */}
+      <main className="relative z-10 max-w-4xl mx-auto w-full flex flex-col items-center text-center pt-24 sm:pt-28 pb-8 my-auto">
         {/* Top AI Agent Robot with Gentle Float & Interactive Hover Motion */}
         <motion.div
           initial={{ opacity: 0, y: -20, scale: 0.9 }}
@@ -87,7 +110,7 @@ export default function App() {
 
         {/* Headlines */}
         <div className="space-y-1 sm:space-y-2 max-w-3xl mx-auto">
-          {/* Line 1: Your Smart Assistant */}
+          {/* Line 1: RayaShop Agent */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -110,7 +133,7 @@ export default function App() {
           {/* Subtitle */}
           <motion.p
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.75 }}
+            animate={{ opacity: 0.8 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             className="pt-2 text-base sm:text-lg md:text-xl text-white font-normal max-w-xl mx-auto leading-relaxed"
           >
@@ -154,6 +177,9 @@ export default function App() {
           </a>
         </motion.div>
       </main>
+
+      {/* 4. Bottom Spacing */}
+      <div className="relative z-10 h-6 pointer-events-none" />
     </div>
   );
 }
