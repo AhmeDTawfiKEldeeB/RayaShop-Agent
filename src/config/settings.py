@@ -19,7 +19,7 @@ class PostgresSettings(BaseModel):
     database: str = Field(default="rayashop", description="Database name")
     user: str = Field(default="rayashop_user", description="Database user")
     password: str = Field(default="rayashop_password", description="Database password")
-    sslmode: str = Field(default="require", description="SSL mode")
+    sslmode: str = Field(default="disable", description="SSL mode")
 
     @property
     def url(self) -> str:
