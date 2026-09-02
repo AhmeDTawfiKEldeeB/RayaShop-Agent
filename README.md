@@ -30,14 +30,9 @@ The system is built around a **LangGraph ReAct agent** with three tools: product
 
 ## 🎬 Demo & 📸 Screenshots
 
-### 🎥 Demo Preview
+### 🎥 Demo Video
 
-<div align="center">
-  <img src="assets/demo.gif" alt="RayaShop Agent Demo" width="100%" />
-  <p>
-    <a href="assets/demo.mp4">▶️ <strong>Download / Watch Original Full Quality Video (MP4)</strong></a>
-  </p>
-</div>
+https://github.com/user-attachments/assets/e2148db8-a294-4de8-8b24-6e6417c74abf
 
 ### 🖼️ Screenshots
 
