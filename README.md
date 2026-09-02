@@ -28,7 +28,15 @@ The system is built around a **LangGraph ReAct agent** with three tools: product
 
 ---
 
-## 📸 Screenshots
+## 🎬 Demo & 📸 Screenshots
+
+### 🎥 Demo Video
+
+<div align="center">
+  <video src="assets/demo.mkv" controls width="100%"></video>
+</div>
+
+### 🖼️ Screenshots
 
 | Landing Page | Chat UI |
 |:---:|:---:|
