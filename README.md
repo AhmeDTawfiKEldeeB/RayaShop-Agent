@@ -33,7 +33,12 @@ The system is built around a **LangGraph ReAct agent** with three tools: product
 ### 🎥 Demo Video
 
 <div align="center">
-  <video src="assets/demo.mkv" controls width="100%"></video>
+  <video src="assets/demo.mp4" poster="assets/demo-thumbnail.png" controls="controls" width="100%">
+    Your browser does not support the video tag. <a href="assets/demo.mp4">Click here to watch the demo video</a>.
+  </video>
+  <p>
+    <a href="assets/demo.mp4">▶️ <strong>Watch Full Demo Video (MP4)</strong></a>
+  </p>
 </div>
 
 ### 🖼️ Screenshots
