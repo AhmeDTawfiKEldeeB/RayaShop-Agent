@@ -165,7 +165,7 @@ export default function App() {
 
           {/* Button 2: Ask Agent (White background, single line text) */}
           <a
-            href="/chat"
+            href="/chat.html"
             className="group relative flex items-center justify-between gap-4 px-6 sm:px-7 py-3.5 sm:py-4 bg-white text-black rounded-[22px] shadow-[0_0_35px_rgba(48,84,255,0.7)] hover:shadow-[0_0_55px_rgba(48,84,255,1)] hover:scale-105 active:scale-95 transition-all duration-300"
           >
             <span className="font-extrabold text-base sm:text-lg tracking-wide text-black whitespace-nowrap">

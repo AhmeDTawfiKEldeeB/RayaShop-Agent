@@ -49,7 +49,7 @@ export const Navbar: React.FC = () => {
           Book A Demo
         </a>
         <a
-          href="/chat"
+          href="/chat.html"
           className="px-5 py-2.5 rounded-full bg-white text-black font-semibold text-sm hover:bg-slate-100 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 transition-all duration-300"
         >
           Get Started
