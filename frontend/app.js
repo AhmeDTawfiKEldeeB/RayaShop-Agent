@@ -192,6 +192,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             });
 
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                console.error('Server error response:', res.status, errData);
+                hideTypingIndicator();
+                isTyping = false;
+                const errorMsg = errData.detail || errData.response || `عذراً، حدث خطأ في الخادم (كود: ${res.status}). يرجى المحاولة مرة أخرى.`;
+                addMessage(errorMsg, 'assistant');
+                return;
+            }
+
             const data = await res.json();
 
             hideTypingIndicator();
@@ -210,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Chat error:', err);
             hideTypingIndicator();
             isTyping = false;
-            addMessage('عذراً، حصل مشكلة في الاتصال بالخادم. حاول مرة أخرى.', 'assistant');
+            addMessage('عذراً، تعذر الاتصال بالسيرفر. تأكد من أن السيرفر يعمل على البورت 8000.', 'assistant');
         }
     }
 
