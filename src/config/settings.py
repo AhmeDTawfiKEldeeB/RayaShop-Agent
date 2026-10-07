@@ -126,11 +126,11 @@ class LLMOpenRouterSettings(BaseModel):
 
 class LLMGroqSettings(BaseModel):
     api_key: str | None = Field(default=None, description="Groq API key")
-    model: str = Field(default="llama-3.3-70b-versatile", description="Groq model name")
+    model: str = Field(default="qwen/qwen3.8-27b", description="Groq model name")
 
 
 class LLMSettings(BaseModel):
-    provider: str = Field(default="gemini", description="LLM provider")
+    provider: str = Field(default="groq", description="LLM provider")
     gemini: LLMGeminiSettings = LLMGeminiSettings()
     openrouter: LLMOpenRouterSettings = LLMOpenRouterSettings()
     groq: LLMGroqSettings = LLMGroqSettings()
