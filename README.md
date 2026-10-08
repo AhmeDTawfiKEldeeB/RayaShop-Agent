@@ -49,7 +49,7 @@ We wanted to make this process easier by turning product discovery into a **conv
 
 ### 🎥 Demo
 
-![Demo](assets/demo.gif)
+<video src="https://github.com/user-attachments/assets/e2148db8-a294-4de8-8b24-6e6417c74abf" controls muted loop></video>
 
 ### 🖼️ Screenshots
 
