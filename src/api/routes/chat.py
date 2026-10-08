@@ -1,20 +1,32 @@
 import json
+import logging
 import uuid
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from src.api.schemas.chat import ChatRequest, ChatResponse, ChatProduct
 from src.Agent.shopping_agent import get_shopping_agent
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/chat", tags=["Chat"])
 
 @router.post("", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     thread_id = request.thread_id or str(uuid.uuid4())
+    logger.info("Received chat request for thread_id=%s, message='%s'", thread_id, request.message[:60])
     
-    agent = get_shopping_agent()
-    result = agent.invoke(
-        {"messages": [("user", request.message)]}, 
-        config={"configurable": {"thread_id": thread_id}}
-    )
+    try:
+        agent = get_shopping_agent()
+        result = agent.invoke(
+            {"messages": [("user", request.message)]}, 
+            config={"configurable": {"thread_id": thread_id}}
+        )
+    except Exception as exc:
+        logger.exception("Error executing shopping agent: %s", exc)
+        return ChatResponse(
+            thread_id=thread_id,
+            response=f"عذراً، حدث خطأ أثناء معالجة طلبك ({exc}). يرجى المحاولة مرة أخرى.",
+            products=[]
+        )
     
     final_ai_msg = ""
     for msg in reversed(result.get("messages", [])):
@@ -53,12 +65,12 @@ async def chat(request: ChatRequest):
                     if tool_products:
                         products = tool_products
                         break  # Take only the products from the latest search
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Error parsing tool products: %s", e)
                 
     return ChatResponse(
         thread_id=thread_id,
-        response=final_ai_msg,
+        response=final_ai_msg or "عذراً، لم أتمكن من إيجاد رد مناسب.",
         products=products
     )
 
